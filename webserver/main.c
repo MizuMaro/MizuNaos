@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <unistd.h>
-#include "prototypes.h"
+#include "socket.h"
 #include <arpa/inet.h>
 
 int main ( int argc , char ** argv )
@@ -56,7 +56,7 @@ int main ( int argc , char ** argv )
 	}
 	/* On peut maintenant dialoguer avec le client */
 
-	const char *message_bienvenue = "Bonjour, bienvnue sur mon serveur\n";
+	const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
 	write(socket_client, message_bienvenue, strlen(message_bienvenue));
 
 
