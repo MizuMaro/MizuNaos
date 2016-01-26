@@ -3,7 +3,7 @@
 
 CC = gcc
 LD = gcc
-CFLAGS = - Wall -W - Werror
+CFLAGS = -Wall -W -Werror
 LDFLAGS =
 
 # Le nom de l’exécutable à fabriquer
@@ -14,29 +14,29 @@ EXE = launcher
 # la listes des fichiers .h, .c et le nom des fichiers .o à fabriquer
 # On utilise la directive particulière $(wildcard ...) qui permet
 # de construire automatiquement une liste de fichiers
-HEADERS = $ ( wildcard *. h )
-CFILES = $ ( wildcard *. c )
+HEADERS = $(wildcard *.h)
+CFILES = $(wildcard *.c)
 # Cette construction de variable veut dire: remplacer la chaine ".c" par
 # ".o" dans la variable CFILES
 # Ceci nous permet de construire la liste des fichiers .o à fabriquer
 
-OBJS = $ ( CFILES :. c =. o )
+OBJS = $(CFILES:.c=.o)
 
 # Même utilisation que précédemment. On précise les règles qui
 # ne fabrique pas de fichier du nom de leur cible
 
-. PHONY : all clean mrproper
+.PHONY: all clean mrproper
 
 # La règle par défaut déclenche la fabrication de l’exécutable
 # par dépendance
 
-all : $ ( EXE )
+all: $(EXE)
 
 # Cette règle permet de construire l’exécutable. Elle dépend des fichiers
 # .o et effectue l’édition de lien. Rien de nouveau ici
 
-$ ( EXE ): $ ( OBJS )
-$ ( LD ) $ ^ $ ( LDFLAGS ) -o $@
+$(EXE): $(OBJS)
+	$(LD) $^ $(LDFLAGS) -o $@
 
 # Cette règle permet de construire automatiquement les règles
 # de compilation pour chacun des fichiers .c
@@ -48,16 +48,17 @@ $ ( LD ) $ ^ $ ( LDFLAGS ) -o $@
 # tous les fichiers .c qui incluent ce fichier sont recompilés
 # Après votre première compilation, regardez le contenu du fichier
 # makefile.dep généré afin de comprendre exactement de quoi il retourne.
-makefile . dep : $ ( CFILES ) $ ( HEADERS )
-$ ( CC ) - MM $ ( CFILES ) > $@
+makefile.dep: $(CFILES) $(HEADERS)
+	$(CC) -MM $(CFILES) >$@
 # Cette règle efface le fichier de dépendances et les fichiers .o
-clean :
-$ ( RM ) $ ( OBJS ) makefile . dep
+clean:
+	$(RM) $(OBJS) makefile.dep
 # Cette règle effectue la précédente et efface en plus l’exécutable
-mrproper : clean
-$ ( RM ) $ ( EXE )
+mrproper: clean
+	$(RM) $(EXE)
 # On inclue le fichier de dépendance qui va contenir les règles
 # de construction des fichiers .o
 # S’il n’existe pas, make invoque automatiquement la règle
 # qui l’a pour cible
-include makefile . dep
+
+include makefile.dep
