@@ -38,7 +38,27 @@ int main ( int argc , char ** argv )
 		perror("bind socket_serveur");
 		/* traitement de l'erreur */
 	}
+
+	if(listen(socket_serveur, 10) == -1)
+	{
+		perror("listen socket_serveur");
+		/* traitement d'erreur */
+	}
+
 	
-	
-	return 0;
+	int socket_client;
+
+	socket_client = accept(socket_serveur, NULL, NULL);
+	if(socket_client == -1)
+	{
+		perror("accept");
+		/* traitement d'erreur */
+	}
+	/* On peut maintenant dialoguer avec le client */
+
+	const char *message_bienvenue = "Bonjour, bienvnue sur mon serveur\n";
+	write(socket_client, message_bienvenue, strlen(message_bienvenue));
+
+
+	return socket_serveur;
 }
