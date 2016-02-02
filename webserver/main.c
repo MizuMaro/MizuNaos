@@ -10,7 +10,7 @@
 
 int main ( int argc , char ** argv )
 {
-	int socket_serveur;
+	int socket_serveur = creer_serveur(8080);
 
 	struct sockaddr_in saddr;	
 
