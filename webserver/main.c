@@ -36,6 +36,7 @@ int main ( int argc , char ** argv )
 	/* On peut maintenant dialoguer avec le client */
 
 	const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
+        sleep(1000);
 	write(socket_client, message_bienvenue, strlen(message_bienvenue));
 
 	close(socket_client);
