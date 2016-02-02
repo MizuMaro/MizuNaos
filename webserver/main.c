@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <time.h>
 
+#define BUF_SIZE 1024
+
 int main ( int argc , char ** argv )
 {
 	
