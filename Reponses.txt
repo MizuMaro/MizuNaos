@@ -4,6 +4,6 @@ Quitter le serveur et le relancer: Il ne se passe rien de particulier, le serveu
 
 Rajouter sleep(1) : Le serveur attend bien 1 seconde avant de renvoyer le message
 
-Telnet ::1 8080 : ça ne fonctionne pas connection refusé 
+Telnet ::1 8080 : ça ne fonctionne pas connection refusé car ipv6
 
 On ne peut pas lancer 2 serveur en même temps
