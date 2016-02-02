@@ -10,15 +10,13 @@
 
 int main ( int argc , char ** argv )
 {
-	int socket_serveur = creer_serveur(8080);
-
 	if ( argc > 1 && strcmp (argv[1],"-advice") == 0) {
   		printf("Don't Panic ! \n");
   		return 42;
 	}
 
 	printf("Création de la socket_serveur...\n");
-	socket_serveur = socket(AF_INET, SOCK_STREAM, 0);
+	int socket_serveur = creer_serveur(8080);
 	if(socket_serveur == -1)
 	{
 		perror("socket_serveur");
