@@ -19,7 +19,11 @@ int creer_serveur(int port){
 	struct sockaddr_in socket ;
 	socket.sin_family = AF_INET ; // ipv4
 	socket.sin_port = htons (port); // port ecoute
-	socket.sin_addr.s_addr = INADDR_ANY; 
+	socket.sin_addr.s_addr = INADDR_ANY;
+	int optival = 1;
+	if(setsockopt(socketServeur, SOL_SOCKET, SO_REUSEADDR, &optival, sizeof(int)) == -1){
+		perror("Can not set SO_REUSEADDR option");
+	} 
 	if (bind(socketServeur, (struct sockaddr *)&socket, sizeof(socket)) == -1){
 		perror("erreur bind");
 		return -1;	
