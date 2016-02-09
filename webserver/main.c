@@ -8,11 +8,27 @@
 #include "socket.h"
 #include <arpa/inet.h>
 #include <time.h>
+#include <signal.h>
 
 #define BUF_SIZE 1024
 
+void initialiser_signaux(void)
+{	
+	printf("1");
+	 if(signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+         {
+                 perror("signal");
+         }
+	printf("2");
+}
+
+
+
 int main ( int argc , char ** argv )
 {
+
+	initialiser_signaux();
+
 	if ( argc > 1 && strcmp (argv[1],"-advice") == 0) {
   		printf("Don't Panic ! \n");
   		return 42;
@@ -62,3 +78,4 @@ int main ( int argc , char ** argv )
 
 	return socket_serveur;
 }
+
