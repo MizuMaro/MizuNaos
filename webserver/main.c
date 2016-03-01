@@ -12,21 +12,16 @@
 
 #define BUF_SIZE 1024
 
-int main ( int argc , char ** argv )
+int main ()
 {
 
 	initialiser_signaux();
-
-	if ( argc > 1 && strcmp (argv[1],"-advice") == 0) {
-  		printf("Don't Panic ! \n");
-  		return 42;
-	}
-
 	printf("Création de la socket_serveur...\n");
 	int socket_serveur = creer_serveur(8080);
 	if(socket_serveur == -1)
 	{
 		perror("socket_serveur");
+		return -1;
 		/* traitement de l'erreur */
 	}
 	printf("Socket_serveur crée !\n");	
@@ -34,33 +29,51 @@ int main ( int argc , char ** argv )
 
 	int socket_client;
 
-	socket_client = accept(socket_serveur, NULL, NULL);
-	if(socket_client == -1)
-	{
-		perror("accept");
-		/* traitement d'erreur */
-	}
-	/* On peut maintenant dialoguer avec le client */
- 	sleep(1);
-	const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
 
-	write(socket_client, message_bienvenue, strlen(message_bienvenue));
-
-	
-	char buf[BUF_SIZE];
 	while(1){
-		bzero(buf, BUF_SIZE);
-		int n = read(socket_client, buf, BUF_SIZE-1);
-		if(n == -1){
-			perror("read socket");
-			return 1;	
+		socket_client = accept(socket_serveur, NULL, NULL);
+		if(socket_client == -1)
+		{
+			perror("accept");
+			/* traitement d'erreur */
+			return -1;
 		}
-		buf[BUF_SIZE-1] = '\0';
-		printf("%s", buf);
-		write(socket_client, buf, n);
+	
+		
+		if(fork() == 0){
+			/* On peut maintenant dialoguer avec le client */
+		 	sleep(1);
+			const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
+	
+			write(socket_client, message_bienvenue, strlen(message_bienvenue));	
+			char buf[BUF_SIZE];
+			bzero(buf, BUF_SIZE);
+	
+			int n;	
+			while((n = read(socket_client, buf, BUF_SIZE-1)) > 0){ 
+				if(n == -1){
+					perror("read socket");
+					return 1;	
+				}
+
+				buf[BUF_SIZE-1] = '\0';
+				printf("%s", buf);		
+				if(write(socket_client, buf, n) <= 0)
+					break;
+
+				bzero(buf, BUF_SIZE);
+				
+			}
+			perror("socket closed");
+			close(socket_client);
+			exit(1);
+		}else{
+		
+			close(socket_client);
+		}
+
 	}
 
-	close(socket_client);
 	close(socket_serveur);
 
 
