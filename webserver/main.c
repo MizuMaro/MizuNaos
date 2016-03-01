@@ -43,50 +43,49 @@ int main ()
 
 
 	while(1){
-	socket_client = accept(socket_serveur, NULL, NULL);
-	if(socket_client == -1)
-	{
-		perror("accept");
-		/* traitement d'erreur */
-		return -1;
-	}
-
+		socket_client = accept(socket_serveur, NULL, NULL);
+		if(socket_client == -1)
+		{
+			perror("accept");
+			/* traitement d'erreur */
+			return -1;
+		}
 	
-	if(fork() == 0){
-		/* On peut maintenant dialoguer avec le client */
-	 	sleep(1);
-		const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
-
-		write(socket_client, message_bienvenue, strlen(message_bienvenue));
-
+		
+		if(fork() == 0){
+			/* On peut maintenant dialoguer avec le client */
+		 	sleep(1);
+			const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
 	
-		char buf[BUF_SIZE];
-		bzero(buf, BUF_SIZE);
-
-		int n;
-		while((n = read(socket_client, buf, BUF_SIZE-1)) > 0){ 
-			if(n == -1){
-				perror("read socket");
-				return 1;	
-			}
-
-			buf[BUF_SIZE-1] = '\0';
-			printf("%s", buf);		
-			if(write(socket_client, buf, n) <= 0)
-				break;
-
+			write(socket_client, message_bienvenue, strlen(message_bienvenue));	
+			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
+	
+			int n;	
+			while((n = read(socket_client, buf, BUF_SIZE-1)) > 0){ 
+				if(n == -1){
+					perror("read socket");
+					return 1;	
+				}
+
+				buf[BUF_SIZE-1] = '\0';
+				printf("%s", buf);		
+				if(write(socket_client, buf, n) <= 0)
+					break;
+
+				bzero(buf, BUF_SIZE);
 				
 			}
+			perror("socket closed");
+			close(socket_client);
+			exit(1);
 		}else{
 		
-				close(socket_client);
-				exit(1);
-			}
+			close(socket_client);
+		}
 
 	}
 
-	close(socket_client);
 	close(socket_serveur);
 
 
