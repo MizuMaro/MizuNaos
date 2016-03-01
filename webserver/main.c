@@ -12,18 +12,6 @@
 
 #define BUF_SIZE 1024
 
-void initialiser_signaux(void)
-{	
-	printf("1");
-	 if(signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-         {
-                 perror("signal");
-         }
-	printf("2");
-}
-
-
-
 int main ( int argc , char ** argv )
 {
 
