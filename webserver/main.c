@@ -44,26 +44,25 @@ int main ()
 			/* On peut maintenant dialoguer avec le client */
 		 	sleep(1);
 			const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
-	
 			write(socket_client, message_bienvenue, strlen(message_bienvenue));	
 			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
+
+			FILE *fdo = fdopen(socket_client, "w+");
 	
-			int n;	
-			while((n = read(socket_client, buf, BUF_SIZE-1)) > 0){ 
-				if(n == -1){
-					perror("read socket");
-					return 1;	
-				}
+				
+			while(fgets(buf,BUF_SIZE-1, fdo) != NULL){ 
+				
 
 				buf[BUF_SIZE-1] = '\0';
 				printf("%s", buf);		
-				if(write(socket_client, buf, n) <= 0)
+				if(fprintf(fdo, "<ZA WARUDO !!!> %s", buf) < 0)
 					break;
 
 				bzero(buf, BUF_SIZE);
 				
 			}
+			fclose(fdo);
 			perror("socket closed");
 			close(socket_client);
 			exit(1);
