@@ -56,8 +56,8 @@ int main ()
 
 				buf[BUF_SIZE-1] = '\0';
 				printf("%s", buf);		
-				if(fprintf(fdo, "<ZA WARUDO !!!> %s", buf) < 0)
-					break;
+				//if(fprintf(fdo, "<ZA WARUDO !!!> %s", buf) < 0)
+				//	break;
 
 				bzero(buf, BUF_SIZE);
 				
