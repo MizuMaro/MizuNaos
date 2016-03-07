@@ -12,6 +12,26 @@
 
 #define BUF_SIZE 1024
 
+
+
+int check_line(char *line){
+int words = 0;
+	char *token;
+	token = strtok(line, " ");
+
+	while(token != NULL){
+		//On va maintenant analyser les mots
+		if(words == 0 && !strcmp(token, "GET") == 0)
+			return 0;
+		if(words == 2 && !(strncmp(token, "HTTP/1.0", 8) == 0 || strncmp(token, "HTTP/1.1", 8) == 0))
+			return 0;
+		// On récupère le prochain mot
+		token = strtok(NULL, " ");
+		words++;
+	}
+	return words == 3;
+}
+
 int main ()
 {
 
@@ -49,19 +69,28 @@ int main ()
 			bzero(buf, BUF_SIZE);
 
 			FILE *fdo = fdopen(socket_client, "w+");
+			int content_length ;
+			char *msg;
+			
+			if(fgets(buf, BUF_SIZE, fdo) != NULL){
+				printf("%s\n", buf);
+			if(check_line(buf)){
+				msg = "<html><head><meta charset=\"UTF-8\"></head><h1>It works!</h1>Bonjour, bienvenue sur le serveur MizuNaos. Ce serveur est créé pour remplacer ZA WARUDO.\nOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR.</html>";
+				content_length = strlen(msg);
+				printf( "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-length: %d\r\nContent-Type: text/html\r\n\r\n%s", content_length, msg);	
 	
-				
-			while(fgets(buf,BUF_SIZE-1, fdo) != NULL){ 
-				
-
-				buf[BUF_SIZE-1] = '\0';
-				printf("%s", buf);		
-				//if(fprintf(fdo, "<ZA WARUDO !!!> %s", buf) < 0)
-				//	break;
-
-				bzero(buf, BUF_SIZE);
+			}else{
+				msg = "400 Bad request";
+				content_length = strlen(msg);
+				printf( "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
 				
 			}
+			while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
+				fgets(buf, BUF_SIZE, fdo); 
+
+			printf("response :\n%d\n", socket_client);
+			fprintf(fdo,"%d", socket_client);		
+		}
 			fclose(fdo);
 			perror("socket closed");
 			close(socket_client);
@@ -78,4 +107,5 @@ int main ()
 
 	return socket_serveur;
 }
+
 
