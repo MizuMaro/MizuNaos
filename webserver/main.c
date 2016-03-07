@@ -63,8 +63,7 @@ int main ()
 		if(fork() == 0){
 			/* On peut maintenant dialoguer avec le client */
 		 	sleep(1);
-			const char *message_bienvenue = "Bonjour, bienvenue sur mon serveur\n";
-			write(socket_client, message_bienvenue, strlen(message_bienvenue));	
+				
 			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
 
@@ -75,21 +74,23 @@ int main ()
 			if(fgets(buf, BUF_SIZE, fdo) != NULL){
 				printf("%s\n", buf);
 			if(check_line(buf)){
-				msg = "<html><head><meta charset=\"UTF-8\"></head><h1>It works!</h1>Bonjour, bienvenue sur le serveur MizuNaos. Ce serveur est créé pour remplacer ZA WARUDO.\nOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR\nnOMAR OMAR OMARnOMAR OMAR OMARnOMAR OMAR OMAR.</html>";
+				msg = "<html><head><meta charset=\"UTF-8\"></head><h1>YEAH!</h1>Bonjour, bienvenue sur le serveur MizuNaos. Ce serveur est créé pour remplacer ZA WARUDO.</html>";
 				content_length = strlen(msg);
 				printf( "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-length: %d\r\nContent-Type: text/html\r\n\r\n%s", content_length, msg);	
 	
+				write(socket_client, msg, strlen(msg));
 			}else{
 				msg = "400 Bad request";
 				content_length = strlen(msg);
 				printf( "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
-				
+			
+				write(socket_client, msg, strlen(msg));	
 			}
 			while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
 				fgets(buf, BUF_SIZE, fdo); 
 
 			printf("response :\n%d\n", socket_client);
-			fprintf(fdo,"%d", socket_client);		
+			printf("%d", socket_client);		
 		}
 			fclose(fdo);
 			perror("socket closed");
