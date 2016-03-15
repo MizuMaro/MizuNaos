@@ -117,6 +117,8 @@ int main ()
 
 			fgets_or_exit(buf,BUF_SIZE,client);
 			
+			skip_headers(client);
+
 			http_request req;
 
 			int bad_request = !parse_http_request(buf,&req);
