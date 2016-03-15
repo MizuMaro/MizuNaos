@@ -11,21 +11,24 @@
 #include <signal.h>
 
 #define BUF_SIZE 1024
+#define URL_SIZE 255
 
 
-
-int check_line(char *line){
-int words = 0;
+int check_line(char *line, char *url){
+	int words = 0;
 	char *token;
 	token = strtok(line, " ");
 
 	while(token != NULL){
-		//On va maintenant analyser les mots
+		//On  analyse les mots
 		if(words == 0 && !strcmp(token, "GET") == 0)
 			return 0;
+		if(words == 1 && strlen(token) <= URL_SIZE)
+			strcpy(url, token);
+		
 		if(words == 2 && !(strncmp(token, "HTTP/1.0", 8) == 0 || strncmp(token, "HTTP/1.1", 8) == 0))
 			return 0;
-		// On récupère le prochain mot
+		// On récupère mot
 		token = strtok(NULL, " ");
 		words++;
 	}
@@ -67,31 +70,39 @@ int main ()
 			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
 
+			char url[URL_SIZE];
+
 			FILE *fdo = fdopen(socket_client, "w+");
 			int content_length ;
 			char *msg;
 			
 			if(fgets(buf, BUF_SIZE, fdo) != NULL){
 				printf("%s\n", buf);
-			if(check_line(buf)){
-				msg = "<html><head><meta charset=\"UTF-8\"></head><h1>YEAH!</h1>Bonjour, bienvenue sur le serveur MizuNaos.ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA /html>";
-				content_length = strlen(msg);
-				printf( "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-length: %d\r\nContent-Type: text/html\r\n\r\n%s", content_length, msg);	
+				int check = check_line(buf,url);
+				if(check && strcmp(url,"/") == 0){
+					msg = "<html><head><meta charset=\"UTF-8\"></head><h1>YEAH!</h1>Bonjour, bienvenue sur le serveur MizuNaos.ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA /html>";
+					content_length = strlen(msg);
+					printf( "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-length: %d\r\nContent-Type: text/html\r\n\r\n%s", content_length, msg);	
 	
-				write(socket_client, msg, strlen(msg));
-			}else{
-				msg = "400 Bad request";
-				content_length = strlen(msg);
-				printf( "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
+					write(socket_client, msg, strlen(msg));
+				}else if(check){
+					
+					msg = "404 Not found : ";
+					content_length = strlen(msg);
+					printf("HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
+				}else {
+					msg = "400 Bad request";
+					content_length = strlen(msg);
+					printf( "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
 			
-				write(socket_client, msg, strlen(msg));	
-			}
-			while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
-				fgets(buf, BUF_SIZE, fdo); 
+					write(socket_client, msg, strlen(msg));	
+				}
+				while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
+					fgets(buf, BUF_SIZE, fdo); 
 
-			printf("response :\n%d\n", socket_client);
-			printf("%d", socket_client);		
-		}
+				printf("response :\n%d\n", socket_client);
+				printf("%d", socket_client);		
+			}
 			fclose(fdo);
 			perror("socket closed");
 			close(socket_client);
