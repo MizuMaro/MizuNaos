@@ -9,12 +9,50 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <signal.h>
+#include "request.h"
 
 #define BUF_SIZE 1024
 #define URL_SIZE 255
 
+char *fgets_or_exit(char *buffer, int size, FILE *stream)
+{
 
-int check_line(char *line, char *url){
+	if(fgets(buffer, size, stream) == NULL)
+	{
+		exit(1);
+	}
+	return buffer;
+}
+
+void skip_headers(FILE *client)
+{
+	char line[BUF_SIZE];
+
+	while(fgets_or_exit(line, BUF_SIZE, client) != NULL && strcmp(line, "\n") != 0 && strcmp(line, "\r\n") != 0);
+
+
+}
+
+void send_status(FILE *client, int code, const char *reason_phrase)
+{
+	char res[strlen(reason_phrase)+ 20];
+	sprintf(res, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
+	fprintf(client, res);
+}
+
+void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body)
+{
+
+	char res[256+strlen(message_body)];
+	sprintf(res, "Connection: close\r\nContent-length: %zu\r\n\r\n%s", strlen(message_body), message_body);
+	send_status(client, code, reason_phrase);
+	fprintf(client, res);
+
+} 
+
+/*
+int check_line(char *line, char *url)
+{
 	int words = 0;
 	char *token;
 	token = strtok(line, " ");
@@ -34,6 +72,7 @@ int check_line(char *line, char *url){
 	}
 	return words == 3;
 }
+*/
 
 int main ()
 {
@@ -70,12 +109,32 @@ int main ()
 			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
 
-			char url[URL_SIZE];
+			//char url[URL_SIZE];
 
-			FILE *fdo = fdopen(socket_client, "w+");
-			int content_length ;
-			char *msg;
+			FILE *client = fdopen(socket_client, "w+");
+			//int content_length ;
+			char *msg = "<html><head><meta charset=\"UTF-8\"></head><h1>YEA    H!</h1>Bonjour, bienvenue sur le serveur MizuNaos.ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA     ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA     ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA O    RA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA OR    A ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA     ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA     ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA O    RA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA ORA /html>";
+
+			fgets_or_exit(buf,BUF_SIZE,client);
 			
+			http_request req;
+
+			int bad_request = !parse_http_request(buf,&req);
+
+			if(bad_request)
+			{
+				send_response(client, 400, "Bad Request", "Bad request\r\n");
+			}else if(req.method == HTTP_UNSUPPORTED){
+				send_response(client, 405, "Method Not Allowed", "Method Not Allowed\r\n");
+			}else if (strcmp(req.url, "/" ) == 0){
+				send_response(client, 200, "OK" ,msg);
+			}else{
+				send_response(client, 404, "Not Found", "Not Found\r\n");
+			}
+
+						
+
+			/*
 			if(fgets(buf, BUF_SIZE, fdo) != NULL){
 				printf("%s\n", buf);
 				int check = check_line(buf,url);
@@ -99,11 +158,11 @@ int main ()
 				}
 				while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
 					fgets(buf, BUF_SIZE, fdo); 
-
+				*/
 				printf("response :\n%d\n", socket_client);
 				printf("%d", socket_client);		
-			}
-			fclose(fdo);
+			
+			fclose(client);
 			perror("socket closed");
 			close(socket_client);
 			exit(1);
